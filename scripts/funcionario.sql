@@ -34,16 +34,16 @@ alter table departamento
 alter column data_ini set not null;
 
 -- Excluir um atributo
-alter table departamento
-drop column data_ini;
+-- alter table departamento
+-- drop column data_ini;
 
 -- Adicionar um valor padrão DEFAULT
 alter table funcionario
 alter column endereco set default 'Macau-RN';
 
 -- Excluir um valor padrão DEFAULT
-alter table funcionario
-alter column endereco drop default;
+-- alter table funcionario
+-- alter column endereco drop default;
 
 -- Adicionar restrição (constraint) CHECK
 alter table funcionario
@@ -52,8 +52,8 @@ add constraint funcionario_sexo_check
 check (sexo in ('m', 'f', 'o', 'M', 'F', 'O'));
 
 -- Excluir restrição
-alter table funcionario
-drop constraint if exists funcionario_sexo_check;
+-- alter table funcionario
+-- drop constraint if exists funcionario_sexo_check;
 
 -- Adicionar restrição FOREIGN KEY
 alter table funcionario
@@ -65,3 +65,20 @@ on delete no action
 on update cascade;
 
 -- TO DO: adicionar restrições FK para cpf_supervisor e cpf_gerente
+
+alter table funcionario
+add constraint funcionario_cpf_sup_fk
+foreign key (cpf_supervisor)
+references funcionario(cpf)
+-- no action, set null, restrict, cascade, set default
+on delete set null
+on update cascade;
+
+
+alter table departamento
+add constraint departamento_cpf_gerente_fk
+foreign key (cpf_gerente)
+references funcionario(cpf)
+-- no action, set null, restrict, cascade, set default
+on delete set null
+on update cascade;
