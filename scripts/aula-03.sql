@@ -8,13 +8,22 @@ insert into funcionario values
 insert into funcionario (cpf, pnome, unome, email, salario, data_nasc, sexo) values
 ('22233344455', 'Icaro', 'Soares', 'icaro@email.com', 2550, '2005-04-14', 'M');
 
+insert into departamento values
+(1, 'Dev Web', '11122233344', '2025-04-02'),
+(3, 'DevOps', '11122233344', '2025-04-02'),
+(4, 'Dev Back', '11122233344', '2025-04-02');
+
 -- Atualizar
 
 update funcionario
 set sexo='M' where email='pedro@email.com'
 returning cpf, pnome, unome, sexo;
-
 -- returning. faz um pequena consulta.
+
+update funcionario set numero_departamento=1 and cpf_supervisor='11122233344' where email='silva@email.com';
+update funcionario set numero_departamento=3 and cpf_supervisor='11122233344' where email='pedro@email.com';
+update funcionario set numero_departamento=4 and cpf_supervisor='11122233344' where email='lipe@email.com';
+update funcionario set numero_departamento=1 and cpf_supervisor='11122233344' where email='icaro@email.com';
 
 
 -- Remover
