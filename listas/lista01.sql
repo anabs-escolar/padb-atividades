@@ -53,8 +53,28 @@ left join orders o
 where o.user_id is null;
 
 -- 12.	Liste os produtos com preço acima da média em ordem decrescente.
+select name, price from products
+where price > (
+    select avg(price) from products
+);
+
 
 -- 13.	Liste a quantidade de pedidos realizados por cada usuário.
+select count(distinct o.user_id) from orders o
+left join users u
+    on u.id = o.user_id;
 
-select count(distinct o.user_id) from orders
-left join 
+-- 14.	Listar os três produtos mais vendidos.
+select p.name, p.price, sum(op.quantity) as total_quantity from products p
+join orders_products op
+    on p.id = o.pproduct_id
+group by p.name, p.price
+order by total_quantity desc
+limit 3;
+
+-- 15.	Gerar um relatório com: usuários, quantidade de pedidos e valor total comprado.
+select u.id, u.name, count(o.user_id), sum(o.total) as total from users u 
+left join orders o
+    on u.id = o.user_id
+group by u.id
+order by u.id, total;
