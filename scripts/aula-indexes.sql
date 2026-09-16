@@ -190,3 +190,36 @@ where (
 
     ) @@ to_tsquery('portuguese', 'postegresql')
 order by rank;
+
+
+-- JSON Search 
+
+-- Operadores de extensão
+--  >   extrai valor da chave com json/jsonb
+select id, data -> 'position' position from employee_json;
+
+--  >>  extrair o campo como text
+select id, data ->> 'position' position_text from employee_json;
+
+select id, data ->> 'first_name' first_name
+from employee_json
+where data ->> 'position' = 'Developer';
+
+select id, data ->> 'first_name' first_name, data ->> 'salary' salary 
+from employee_json
+where (data ->> 'salary')::numeric > 5000;
+
+--  #>  usado para valores aninhados
+select id, data #> '{address, country}' country_jsonb from employee_json;
+
+-- #>>  valores aninhados para text
+select id, data #>> '{address, country}' country, data ->> 'first_name' first_name
+from employee_json
+where data #>> '{address, country}' = 'Brasil';
+
+-- Operadores de Contenção
+
+-- @>   data contém algo
+select id, data ->> 'first_name' first_name
+from employee_json
+where data @> '{"first_name": "Gael"}';
