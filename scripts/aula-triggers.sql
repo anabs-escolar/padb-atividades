@@ -159,7 +159,7 @@ update funcionario set salario = 14995 where cpf = '22233344455';
 
 update funcionario set salario = 4995 where cpf = '22233344455';
 
--- Uso de WHEN
+-- Uso de WHEN - para análises condicionais
 create or replace function log_salary_changes_when()
     returns trigger
     language plpgsql
@@ -179,12 +179,13 @@ begin
 end;
 $$;
 
+-- ECA - Event, Condition, Action
 drop trigger if exists trg_log_salary_changes_when on funcionario;
 create trigger trg_log_salary_changes_when
-after update on funcionario
-for each row
-when (NEW.salario != OLD.salario)
-execute function log_salary_changes_when();
+after update on funcionario -- Event
+for each row 
+when (NEW.salario != OLD.salario) -- Condition
+execute function log_salary_changes_when(); -- Action
 
 -- Exemplo 5 - BEFORE DELETE
 -- Manutenção de integridade referencial (impedir a exclusão de cliente com pagamentos)
@@ -209,3 +210,105 @@ execute function prevent_customer_del();
 
 -- Teste
 delete from customer where customer_id = 1;
+
+-- AFTER DELETE
+-- Arquivo de funcionários devolvidos ao mercado de trabalho
+
+drop table if exists funcionario_archive;
+create table funcionario_archive (
+    cpf char(11) primary key,
+    nome varchar(100) not null,
+    salario numeric (7,2) not null,
+    deleted_at timestamptz default now() 
+);
+
+create or replace function archive_deleted_funcionario()
+    returns trigger
+    language plpgsql
+as $$
+begin
+    insert into funcionario_archive(cpf, nome, salario)
+    values (OLD.cpf, OLD.pnome || ' ' || OLD.unome, OLD.salario);
+    return old;
+end;
+$$;
+
+drop trigger if exists trg_archive_deleted_funcionario on funcionario;
+create trigger trg_archive_deleted_funcionario
+after delete on funcionario
+for each row
+execute function archive_deleted_funcionario();
+
+delete from funcionario where cpf = '11122233344';
+select cpf, nome, salario, deleted_at at time zone 'America/Sao_Paulo' from funcionario_archive;
+
+-- INSTEAD OF
+
+drop view if exists customer_summary;
+create view customer_summary as 
+select c.customer_id, c.first_name, c.last_name, cs.total
+from customer c 
+join customer_spending cs on cs.customer_id = c.customer_id;
+
+create or replace function update_customer_summary()
+    returns trigger
+    language plpgsql    
+as $$ 
+begin 
+    if TG_OP = 'UPDATE' then
+        update customer
+            set first_name = NEW.first_name,
+                last_name = NEW.last_name
+            where customer_id = NEW.customer;
+    end if;
+    return null;
+end;
+$$;
+
+drop trigger if exists trg_update_customer_summary on customer_summary;
+create trigger trg_update_customer_summary
+instead of update on costumer_summary
+for each row
+execute function update_customer_summary();
+
+-- BEFORE TRUNCATE
+create or replace function truncate_departamento()
+    returns trigger
+    language plpgsql    
+as $$ 
+begin 
+    raise exception 'TRUNCATE na tabale departamento não é permitido';
+end;
+$$;
+
+drop trigger if exists trg_truncate_departamento on departamento;
+create trigger trg_truncate_departamento
+before truncate on departamento
+for each statement
+execute function truncate_departamento();
+
+truncate table departamento;
+
+-- EVENT TRIGGER
+
+create table audits (
+    id serial primary key,
+    username varchar(100) not null,
+    event text not null,
+    executed_at timestamptz default now()
+)
+
+create or replace function audit_command()
+    returns event_trigger
+    language plpgsql    
+as $$ 
+begin 
+    insert into audits(username, event, command)
+    values(session_user, TG_EVENT, TG_TAG);
+end;
+$$;
+
+drop event trigger if exists etrg_audit_command;
+create event trigger etrg_audit_command
+on ddl_command_end
+execute function audit_command();
