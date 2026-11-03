@@ -6,7 +6,8 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-
+from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.search import SearchVectorField
 
 class Actor(models.Model):
     actor_id = models.AutoField(primary_key=True)
@@ -232,11 +233,14 @@ class Film(models.Model):
     rental_rate = models.DecimalField(max_digits=4, decimal_places=2)
     length = models.SmallIntegerField(blank=True, null=True)
     replacement_cost = models.DecimalField(max_digits=5, decimal_places=2)
-    rating = models.TextField(blank=True, null=True)  # This field type is a guess.
+    # rating = models.TextField(blank=True, null=True)  # This field type is a guess.
+    rating = models.CharField(max_length=255,blank=True, null=True)
     last_update = models.DateTimeField()
-    special_features = models.TextField(blank=True, null=True)  # This field type is a guess.
-    fulltext = models.TextField()  # This field type is a guess.
-
+    # special_features = models.TextField(blank=True, null=True)  # This field type is a guess. # ArrayField
+    special_features = ArrayField(models.TextField(), blank=True, null=True)
+    # fulltext = models.TextField()  # This field type is a guess. # SearchVector Field
+    fulltext = SearchVectorField(blank=True, null=True)
+    
     class Meta:
         managed = False
         db_table = 'film'

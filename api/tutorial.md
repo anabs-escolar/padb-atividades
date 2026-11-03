@@ -10,21 +10,18 @@ Este tutorial guia o processo de criação de uma API REST em Django integrando 
 ```bash
 mkdir api
 cd api
-
 ```
 
 
 2. **Instale os pacotes necessários:**
 ```bash
 pip install django djangorestframework drf-spectacular "psycopg[binary]"
-
 ```
 
 
 3. **Salve as dependências no arquivo `requirements.txt`:**
 ```bash
 pip freeze > requirements.txt
-
 ```
 
 
@@ -34,10 +31,7 @@ django-admin startproject config
 mv config dvdrental
 cd dvdrental
 python manage.py startapp backend
-
 ```
-
-
 
 ---
 
@@ -63,12 +57,12 @@ INSTALLED_APPS = [
     # App da sua API
     'backend',
 ]
-
 ```
 
 
 2. **Configure a conexão com o banco de dados PostgreSQL:**
 ```python
+# Adicionar as informaçãoes das suas credenciais
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -79,7 +73,6 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
 ```
 
 
@@ -88,7 +81,6 @@ DATABASES = {
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
-
 ```
 
 
@@ -100,14 +92,12 @@ REST_FRAMEWORK = {
 1. **Inicie o serviço do PostgreSQL (caso esteja desligado):**
 ```bash
 sudo service postgresql start
-
 ```
 
 
 2. **Valide a conexão via terminal interativo do Django:**
 ```bash
 python manage.py shell
-
 ```
 
 
@@ -118,7 +108,6 @@ with connection.cursor() as cursor:
     cursor.execute("SELECT current_database(), current_user, version();")
     print(cursor.fetchone())
 exit()
-
 ```
 
 
@@ -131,7 +120,6 @@ Gere os modelos automaticamente a partir das tabelas existentes no banco de dado
 
 ```bash
 python manage.py inspectdb > backend/models.py
-
 ```
 
 ---
@@ -155,7 +143,6 @@ class People(models.Model):
     class Meta:
         managed = False
         db_table = 'people'
-
 ```
 
 ### 2. Correção no Modelo `Payment` (`on_delete=SET_NULL` sem Nulo)
@@ -180,7 +167,6 @@ class Payment(models.Model):
     class Meta:
         managed = False
         db_table = 'payment'
-
 ```
 
 ### 3. Aplicação e Validação das Alterações
@@ -191,7 +177,6 @@ Execute os comandos abaixo para sincronizar o projeto Django:
 python manage.py makemigrations
 python manage.py migrate
 python manage.py check
-
 ```
 
 ---
@@ -233,7 +218,6 @@ class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
         fields = '__all__'
-
 ```
 
 ### 2. Atualize o arquivo `backend/views.py`
@@ -273,7 +257,6 @@ class RentalViewSet(viewsets.ModelViewSet):
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
-
 ```
 
 ### 3. Configure as URLs em `dvdrental/urls.py`
@@ -317,7 +300,6 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
-
 ```
 
 ---
@@ -327,11 +309,10 @@ urlpatterns = [
 1. **Inicie o servidor de desenvolvimento:**
 ```bash
 python manage.py runserver
-
 ```
 
 
 2. **Acesse as URLs principais no seu navegador:**
-* **Swagger UI (Documentação Interativa):** `[http://127.0.0.1:8000/api/docs/](http://127.0.0.1:8000/api/docs/)`
-* **ReDoc (Documentação Alternativa):** `[http://127.0.0.1:8000/api/schema/redoc/](http://127.0.0.1:8000/api/schema/redoc/)`
-* **Navegador de Endpoints da API:** `[http://127.0.0.1:8000/api/](http://127.0.0.1:8000/api/)`
+* **Swagger UI (Documentação Interativa):** [http://127.0.0.1:8000/api/docs/](http://127.0.0.1:8000/api/docs/)
+* **ReDoc (Documentação Alternativa):** [http://127.0.0.1:8000/api/schema/redoc/](http://127.0.0.1:8000/api/schema/redoc/)
+* **Navegador de Endpoints da API:** [http://127.0.0.1:8000/api/](http://127.0.0.1:8000/api/)
