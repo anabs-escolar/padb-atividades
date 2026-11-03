@@ -1,1 +1,6 @@
 utils/f1db-sql-postgresql.sql
+.venv
+venv
+env
+.env
+__pycache__
